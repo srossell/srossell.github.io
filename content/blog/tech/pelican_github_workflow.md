@@ -1,7 +1,6 @@
 Title: Pelican github pages workflow
 Date: 2019-12-21
-Summary: Building a website using pelican, and then deploying it in github
-pages.
+Summary: Building a website using pelican, and then deploying it in github pages.
 Image: /images/blog/tech/blog_191221_pelican/pelican_icon.png
 Tags: github
 Slug: pelican-github-workflow
