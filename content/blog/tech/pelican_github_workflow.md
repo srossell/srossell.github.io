@@ -32,7 +32,7 @@ do
                 echo 'pushing output folder (production version) to master...'
                 pelican content -o output -s publishconf.py
                 ghp-import --branch=master output
-                git push --no-verify git@github.com:srossell/srossell.github.io.git master
+                git push --force git@github.com:srossell/srossell.github.io.git master
                 pelican content -o output
         fi
 done
@@ -41,6 +41,7 @@ exit 0
 ```
 
 To get the workflow to work in my case, I added the `--branch=master` option
-for `ghp-import` and pushed to `master`. Also, I had to create an ssh key.
+for `ghp-import` and pushed to `master`. Also, I had to create an ssh key. I
+also added the `--force` option to git push.
 
 
