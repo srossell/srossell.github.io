@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Splines to piecewise functions</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="author" content="Sergio Rossell" />
+    <meta name="description" content="How to build piecewise functions from splines." />
+    <meta name="keywords" content="Stan, Bayes, ODEs">
+<!-- Facebook and Twitter integration -->
+<meta property="og:site_name" content="Abstractions and musings"/>
+<meta property="og:title" content="Splines to piecewise functions"/>
+<meta property="og:description" content="How to build piecewise functions from splines."/>
+<meta property="og:url" content="/splines2piecewise.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-01-27 00:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/sergio-rossell.html">
+<meta property="article:section" content="tech"/>
+    <meta property="article:tag" content="Stan"/>
+    <meta property="article:tag" content="Bayes"/>
+    <meta property="article:tag" content="ODEs"/>
+    <meta property="og:image" content="//images/blog/tech/210126_splines2piecewise/pw_spline.png">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="/theme/css/animate.css">
+    <!-- Icomoon Icon Fonts-->
+    <link rel="stylesheet" href="/theme/css/icomoon.css">
+    <!-- Bootstrap  -->
+    <link rel="stylesheet" href="/theme/css/bootstrap.css">
+    <!-- Flexslider  -->
+    <link rel="stylesheet" href="/theme/css/flexslider.css">
+    <!-- Theme style  -->
+    <link rel="stylesheet" href="/theme/css/style.css">
+    <!-- Custom style  -->
+    <link rel="stylesheet" href="/theme/css/custom.css">
+    <!-- pygments code highlight -->
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+    <!-- tipue search -->
+    <link rel="stylesheet" href="/theme/tipuesearch/css/tipuesearch.css">
+
+    <!-- Modernizr JS -->
+    <script src="/theme/js/modernizr-2.6.2.min.js"></script>
+    <!-- FOR IE9 below -->
+    <!--[if lt IE 9]>
+    <script src="/theme/js/respond.min.js"></script>
+    <![endif]-->
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Abstractions and musings Atom">
+
+
+
+    </head>
+    <body>
+    <div id="fh5co-page">
+        <a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle"><i></i></a>
+        <aside id="fh5co-aside" role="complementary" class="border js-fullheight">
+
+            <nav class="fh5co-main-menu" role="navigation">
+            </nav>
+            <div class="clearfix"></div>
+            <h1  id="fh5co-logo">
+                <a href="/index.html">
+                    <img src="/images/logo.svg" />
+                </a>
+            </h1>
+            <nav class="fh5co-main-menu" role="navigation">
+<ul>
+    <!-- home link -->
+    <li><a href="/">Home</a></li>
+
+    <!-- page links -->
+
+    <!-- additional menu items from config -->
+        <!-- <li class="nav-title">Misc</li> -->
+            <li><a href="/blog.html">Blog</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/tags.html">Tags</a></li>
+
+</ul><ul><li><form id="searchform" action="/search.html">
+    <input id="tipue_search_input" data-siteurl="" type="text" size="60" class="form-control search-field" name="q">
+
+    <button type="submit" class="btn btn-primary search-submit"><i class="icon-search4"></i></button>
+</form></li></ul>
+            </nav>
+
+<ul id="social">
+            <li><a href="https://www.linkedin.com/in/sergiorossell/" alt="linkedin"><i class="icon-linkedin2"></i></a></li>
+
+            <li><a href="https://github.com/srossell" alt="github"><i class="icon-github"></i></a></li>
+
+</ul>
+        </aside>
+
+        <div id="fh5co-main">
+
+    <div class="fh5co-narrow-content article-content">
+        <h1 class="fh5co-heading-colored">Splines to piecewise functions</h1>
+
+        <div>by
+                <a href="author/sergio-rossell.html">Sergio Rossell</a> - 27 Jan 2021
+        </div>
+
+            <div><span>Tags: </span>
+                    <span><a href="/tag/stan.html">#Stan</a> </span>
+                    <span><a href="/tag/bayes.html">#Bayes</a> </span>
+                    <span><a href="/tag/odes.html">#ODEs</a> </span>
+            </div>
+
+        <div class="animate-box" data-animate-effect="fadeInLeft">
+            <p class="animate-box" data-animate-effect="fadeInLeft"><h1>Building piecewise functions from splines</h1>
+<p>In this notebook I show how to build piecewse functions from splines using Scipy. If you stay within Python there may be no need for building a piecewise function. My motivation raised from the desire to use splines fitted to data as inputs for modeling in <a href="https://mc-stan.org/">Stan</a>.</p>
+<p>I took ideas from two stackoverflow posts. The <a href="https://stackoverflow.com/questions/43458414/python-scipy-how-to-get-cubic-spline-equations-from-cubicspline">first</a> shows how to build piecewise functions from Scipy's <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html">CubicSpline</a>. The <a href="https://stackoverflow.com/questions/22488637/getting-spline-equation-from-univariatespline-object">second</a> shows how to build piecewise functions from Scipy's <a href="hhttps://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html">UnivariateSpline</a>.</p>
+<p>As an example, I use the example shown in Scipy's UnivariateSpline, with a offset to avoid negative number. Then I show how to use build, from a UnivariateSpline instance, a piecewise function that works in Stan.</p>
+<h3>Piecewise representation of a cubic spline with four knots</h3>
+<div class="math">$$y(x) =
+  \begin{cases}
+     y_0\cdot (x-x_0) + b_0 \cdot (x-x_0) + c_0 \cdot (x-x_0)^2 + d_0\cdot (x-x_0)^3 &amp; \in [x_0, x_1) \\
+     y_0\cdot (x-x_1) + b_1 \cdot (x-x_1) + c_1 \cdot (x-x_1)^2 + d_0\cdot (x-x_1)^3 &amp; \in [x_1, x_2) \\
+     y_0\cdot (x-x_2) + b_2 \cdot (x-x_2) + c_0 \cdot (x-x_2)^2 + d_0\cdot (x-x_2)^3 &amp; \in [x_2, x_3]
+  \end{cases}$$</div>
+<p>How to get this representation from Scipy's UnivariateSpline:</p>
+<p>Create data.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">data_y</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">data_x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>  <span class="c1"># NOTE I added the 0.2 offset</span>
+</pre></div>
+
+
+<p>Fit a spline and extract the coeffients</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">PPoly</span><span class="p">,</span> <span class="n">UnivariateSpline</span>
+
+<span class="n">smoothing_factor</span> <span class="o">=</span> <span class="mf">0.8</span>  <span class="c1"># Selected to obatain a reasonable fit with a low number of knots</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># The order of the spline, i.e. cubic.</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># number of points per segment when plotting the resulting spline</span>
+
+<span class="n">spl</span> <span class="o">=</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">data_x</span><span class="p">,</span> <span class="n">data_y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># getting a piecewise polynomial from the spline</span>
+<span class="n">p_spl</span> <span class="o">=</span> <span class="n">PPoly</span><span class="o">.</span><span class="n">from_spline</span><span class="p">(</span><span class="n">spl</span><span class="o">.</span><span class="n">_eval_args</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The spline object <code>p_spl</code> includes the location of the knots, which define the segments, and the coefficients of the piecewise representation of the spline.</p>
+<div class="highlight"><pre><span></span><span class="n">p_x</span> <span class="o">=</span> <span class="n">p_spl</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="p">]</span>
+<span class="n">p_c</span> <span class="o">=</span> <span class="n">p_spl</span><span class="o">.</span><span class="n">c</span><span class="p">[:,</span> <span class="n">k</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="p">]</span>
+
+<span class="c1">#### A pretty table of the coefficients using pandas</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">p_c</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;ybcd&quot;</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+</pre></div>
+
+
+<table>
+<thead>
+<tr>
+<th align="center">coeff</th>
+<th align="center">segment_0</th>
+<th align="center">segment_1</th>
+<th align="center">segment_2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">y</td>
+<td align="center">-0.168</td>
+<td align="center">0.233</td>
+<td align="center">-0.0928</td>
+</tr>
+<tr>
+<td align="center">b</td>
+<td align="center">0.920</td>
+<td align="center">-0.626</td>
+<td align="center">0.400</td>
+</tr>
+<tr>
+<td align="center">c</td>
+<td align="center">-1.022</td>
+<td align="center">-0.120</td>
+<td align="center">-0.452</td>
+</tr>
+<tr>
+<td align="center">d</td>
+<td align="center">0.415</td>
+<td align="center">1.081</td>
+<td align="center">0.290</td>
+</tr>
+</tbody>
+</table>
+<p>Depending on you application you may wish to use a vecotized function (which I call here piecewise_segment) or a point by point function (piecewise_point)</p>
+<div class="highlight"><pre><span></span><span class="n">piecewise_segment</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c_col_vec</span><span class="p">:</span> <span class="n">c_col_vec</span> <span class="o">@</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+<span class="n">piecewise_point</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c_col_vec</span><span class="p">:</span> <span class="n">c_col_vec</span> <span class="o">@</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+
+<h2>An illustration of the segements in the piecewise function.</h2>
+<p>The start and end of the segments is given by the knots of the spline regression.</p>
+<div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_x</span><span class="p">,</span> <span class="n">data_y</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">segment_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">p_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">p_x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">segment_y</span> <span class="o">=</span> <span class="n">piecewise_segment</span><span class="p">(</span><span class="n">segment_x</span><span class="p">,</span> <span class="n">p_x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">p_c</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="c1"># .dot(exp_x)  # s.c[:, 1] @ exp_x</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">segment_x</span><span class="p">,</span> <span class="n">segment_y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Segment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+
+
+<p><img alt="piecewisespline" src="/images/blog/tech/210126_splines2piecewise/pw_spline.png"></p>
+<h2>Python example of a piecewise function</h2>
+<p>Which could be used, for instance, as an input for an ordinary differential equation solver.</p>
+<div class="highlight"><pre><span></span><span class="n">triplets</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">p_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p_x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">p_x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">conditions</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">functions</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">fl</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="ow">in</span> <span class="n">triplets</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;    if (x &gt;= </span><span class="si">{lb}</span><span class="s2">) &amp; (x &lt;= </span><span class="si">{ub}</span><span class="s2">):</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;        y = piecewise_point(x, </span><span class="si">{lb}</span><span class="s2">, p_c[:, </span><span class="si">{i}</span><span class="s2">])</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;    elif (x &gt; </span><span class="si">{lb}</span><span class="s2">) &amp; (x &lt;= </span><span class="si">{ub}</span><span class="s2">):</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;        y = piecewise_point(x, </span><span class="si">{lb}</span><span class="s2">, p_c[:, </span><span class="si">{i}</span><span class="s2">])</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">pw_spline_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def pw_spline(x):</span>
+<span class="si">{body}</span><span class="s2"></span>
+<span class="s2">    else:</span>
+<span class="s2">       y = None</span>
+<span class="s2">    return y</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pw_spline_str</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">def</span> <span class="n">pw_spline</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">06122448979591821</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">piecewise_point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">p_c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">elif</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">.</span><span class="mi">06122448979591821</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5306122448979593</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">piecewise_point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">06122448979591821</span><span class="p">,</span> <span class="n">p_c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">elif</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5306122448979593</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">piecewise_point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5306122448979593</span><span class="p">,</span> <span class="n">p_c</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+       <span class="n">y</span> <span class="o">=</span> <span class="k">None</span>
+    <span class="k">return</span> <span class="n">y</span>
+</pre></div>
+
+
+<h2>Python code to write and run a stan model</h2>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Noiseless simulation of a system of ordinary equations driven by a spline input</span>
+<span class="sd">using Stan.</span>
+
+<span class="sd">The system of odes represents a simple linear chain of enzyme catalyzed</span>
+<span class="sd">reactions:</span>
+
+<span class="sd">    -&gt; x1 -&gt; x2</span>
+
+<span class="sd">The rate of the first reaction (arrow) is simulated as a spline function, the</span>
+<span class="sd">rate of the second reaction is catalyzed by an enzyme described with</span>
+<span class="sd">irreversible Michaelis-Menten kinetics.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">PPoly</span><span class="p">,</span> <span class="n">UnivariateSpline</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pystan</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1235</span><span class="p">)</span>
+<span class="c1">###############################################################################</span>
+<span class="c1"># INPUTS</span>
+
+<span class="n">stan_str0</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">functions {{</span>
+<span class="s2">    real[] bwp (</span>
+<span class="s2">        real x,</span>
+<span class="s2">        int k</span>
+<span class="s2">    )</span>
+<span class="s2">    {{</span>
+<span class="s2">    real res[(k + 1)];</span>
+<span class="s2">    for (p in 1:(k + 1)) {{</span>
+<span class="s2">        res[p] = pow(x, ((k + 1) - p));</span>
+<span class="s2">        }}</span>
+<span class="s2">    return res;</span>
+<span class="s2">    }}</span>
+
+<span class="s2">    real piecewise_point (</span>
+<span class="s2">        real x,</span>
+<span class="s2">        real x0,</span>
+<span class="s2">        int i,</span>
+<span class="s2">        int k,</span>
+<span class="s2">        int c_dim1,  // num rows c matrix</span>
+<span class="s2">        int c_dim0,  // num cols c matrix</span>
+<span class="s2">        real[] c_flat  // flattened C matrix</span>
+<span class="s2">    )</span>
+<span class="s2">    {{</span>
+<span class="s2">        row_vector[4] x2pow;</span>
+<span class="s2">        vector[4] c_col;</span>
+<span class="s2">        real y;</span>
+<span class="s2">        x2pow = to_row_vector(bwp((x-x0), k));</span>
+<span class="s2">        c_col = col(to_matrix(c_flat, c_dim0, c_dim1), i);</span>
+<span class="s2">        y = dot_product(x2pow, c_col);</span>
+<span class="s2">        return y;</span>
+<span class="s2">    }}</span>
+
+<span class="si">{pw_spline}</span><span class="s2"></span>
+
+<span class="s2">    real f_mm (</span>
+<span class="s2">        real[] y</span>
+<span class="s2">    )</span>
+<span class="s2">    {{</span>
+<span class="s2">        real v_mm;</span>
+<span class="s2">        v_mm = (y[1]/1) / (1 + (y[1]/1));</span>
+<span class="s2">        return v_mm;</span>
+<span class="s2">    }}</span>
+
+<span class="s2">    real[] myodes(</span>
+<span class="s2">        real t,</span>
+<span class="s2">        real[] y,</span>
+<span class="s2">        real[] p,</span>
+<span class="s2">        real[] x_r,</span>
+<span class="s2">        int [] x_i</span>
+<span class="s2">        )</span>
+<span class="s2">        {{</span>
+<span class="s2">            real dydt[2];</span>
+<span class="s2">            dydt[1] = pw_spline(t, x_r, x_i[1], x_i[2], x_i[3]) - f_mm(y);</span>
+<span class="s2">            dydt[2] = f_mm(y);</span>
+<span class="s2">            return dydt;</span>
+<span class="s2">        }}</span>
+<span class="s2">}}</span>
+
+<span class="s2">data {{</span>
+<span class="s2">    int&lt;lower=1&gt; k;  // order plus 1</span>
+<span class="s2">    int&lt;lower=1&gt; T;</span>
+<span class="s2">    int&lt;lower=1&gt; c_dim0;</span>
+<span class="s2">    int&lt;lower=1&gt; c_dim1;</span>
+<span class="s2">    int&lt;lower=1&gt; c_flat_dim0;</span>
+<span class="s2">    real c_flat[c_flat_dim0];</span>
+<span class="s2">    real t0;</span>
+<span class="s2">    real t_sim[T];</span>
+<span class="s2">    real&lt;lower=0&gt; y0[2]; // init</span>
+<span class="s2">    }}</span>
+
+<span class="s2">transformed data {{</span>
+<span class="s2">    real x_r[0];</span>
+<span class="s2">    int x_i[3];</span>
+<span class="s2">    x_i[1] = k;</span>
+<span class="s2">    x_i[2] = c_dim0;</span>
+<span class="s2">    x_i[3] = c_dim1;</span>
+<span class="s2">}}</span>
+
+<span class="s2">parameters {{</span>
+<span class="s2">    vector&lt;lower=0&gt;[2] sigma;</span>
+<span class="s2">    real&lt;lower=0&gt; p[0];</span>
+<span class="s2">}}</span>
+
+<span class="s2">transformed parameters {{</span>
+<span class="s2">    real x0;</span>
+<span class="s2">    real y_hat[T, 2];</span>
+<span class="s2">    y_hat = integrate_ode_rk45(myodes, y0, t0, t_sim, p, c_flat, x_i);</span>
+<span class="s2">}}</span>
+
+<span class="s2">model {{</span>
+<span class="s2">}}</span>
+
+<span class="s2">generated quantities {{</span>
+<span class="s2">}}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Synthetic data to fit a spline to (from UnivariateSpline documenation)</span>
+<span class="c1"># https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html#scipy.interpolate.UnivariateSpline</span>
+<span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="c1"># NOTE. I added 0.2 to data_y to avoid negative numbers</span>
+<span class="n">data_y</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">data_x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># Smoothing factor for UnivariateSpline. Tuned to give four knots</span>
+<span class="n">smoothing_factor</span> <span class="o">=</span> <span class="mf">0.8</span>
+
+<span class="c1"># Time vector for simulation</span>
+<span class="n">t_sim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">2.9</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># STATEMENTS</span>
+
+<span class="c1"># fit a spline</span>
+<span class="n">spl</span> <span class="o">=</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">data_x</span><span class="p">,</span> <span class="n">data_y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">smoothing_factor</span><span class="p">)</span>
+
+<span class="c1"># getting a piecewise polynomial from the spline</span>
+<span class="n">p_spl</span> <span class="o">=</span> <span class="n">PPoly</span><span class="o">.</span><span class="n">from_spline</span><span class="p">(</span><span class="n">spl</span><span class="o">.</span><span class="n">_eval_args</span><span class="p">)</span>
+
+<span class="n">p_x</span> <span class="o">=</span> <span class="n">p_spl</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">p_c</span> <span class="o">=</span> <span class="n">p_spl</span><span class="o">.</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+
+<span class="c1"># Creating piecewise function from spline</span>
+<span class="n">triplet</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">p_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">p_x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">p_x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="ow">in</span> <span class="n">triplet</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;        if ((x &gt;= </span><span class="si">{lb}</span><span class="s2">) &amp;&amp; (x &lt;= </span><span class="si">{ub}</span><span class="s2">))</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;            y = piecewise_point(x, </span><span class="si">{lb}</span><span class="s2">, </span><span class="si">{i}</span><span class="s2">, k, c_dim0, c_dim1, c);</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">p_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;        else  // ((x &gt; </span><span class="si">{lb}</span><span class="s2">) &amp;&amp; (x &lt;= </span><span class="si">{ub}</span><span class="s2">))</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;            y = piecewise_point(x, </span><span class="si">{lb}</span><span class="s2">, </span><span class="si">{i}</span><span class="s2">, k, c_dim0, c_dim1, c);&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;        else if ((x &gt; </span><span class="si">{lb}</span><span class="s2">) &amp;&amp; (x &lt;= </span><span class="si">{ub}</span><span class="s2">))</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;            y = piecewise_point(x, </span><span class="si">{lb}</span><span class="s2">, </span><span class="si">{i}</span><span class="s2">, k, c_dim0, c_dim1, c);</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="n">pw_spline_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    real pw_spline (</span>
+<span class="s2">        real x,</span>
+<span class="s2">        real[] c,</span>
+<span class="s2">        int k,</span>
+<span class="s2">        int c_dim1,  // num rows c matrix</span>
+<span class="s2">        int c_dim0  // num cols c matrix</span>
+<span class="s2">    )</span>
+<span class="s2">    {{</span>
+<span class="s2">    real y;</span>
+<span class="si">{body}</span><span class="s2"></span>
+<span class="s2">    return y;</span>
+<span class="s2">    }}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">stan_str</span> <span class="o">=</span> <span class="n">stan_str0</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pw_spline</span><span class="o">=</span><span class="n">pw_spline_str</span><span class="p">)</span>
+
+<span class="c1"># Dictionary to pass to the stan model</span>
+<span class="n">datadict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Degree of the spline to fit (i.e. cubic)</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;c_dim0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;c_dim1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;c_flat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;c_flat_dim0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;t0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.0</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;t_sim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_sim</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_sim</span><span class="p">)</span>
+<span class="n">datadict</span><span class="p">[</span><span class="s2">&quot;y0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># compile StanModel</span>
+<span class="n">sm</span> <span class="o">=</span> <span class="n">pystan</span><span class="o">.</span><span class="n">StanModel</span><span class="p">(</span><span class="n">model_code</span><span class="o">=</span><span class="n">stan_str</span><span class="p">)</span>
+
+<span class="n">fit</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">sampling</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">datadict</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;Fixed_param&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="n">summary</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="n">df_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;summary_colnames&quot;</span><span class="p">],</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;summary_rownames&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">fit_dict</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+<span class="n">fit_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">fit_dict</span><span class="p">[</span><span class="s2">&quot;y_hat&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">t_sim</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">])</span>
+
+<span class="n">fit_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">subplots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></p>
+        </div>
+    </div>
+
+
+            <!-- <div class="fh5co-footer">
+    <p><small>&copy; 2016 Blend Free HTML5. All Rights Reserved.</span> <span>Designed by <a href="http://freehtml5.co/" target="_blank">FreeHTML5.co</a></span>
+    <br /><span>Pelican Theme by: <a href="https://github.com/claudio-walser/pelican-fh5co-marble" target="_blank">Claudio Walser</a></span></small></p>
+
+</div> -->
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+    <!-- jQuery Easing -->
+    <script src="/theme/js/jquery.easing.1.3.js"></script>
+    <!-- Bootstrap -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+    <!-- Waypoints -->
+    <script src="/theme/js/jquery.waypoints.min.js"></script>
+    <!-- Flexslider -->
+    <script src="/theme/js/jquery.flexslider-min.js"></script>
+
+
+    <!-- MAIN JS -->
+    <script src="/theme/js/main.js"></script>
+    </body>
+</html>
