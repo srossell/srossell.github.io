@@ -15,7 +15,7 @@ theme](https://github.com/claudio-walser/pelican-fh5co-marble). The workflow is
 modified from a workflow by Joel Zeldes at
 [anotherdatum](http://anotherdatum.com/pelican-and-github-pages-workflow.html).
 
-First create a repository with a `master` and a `source` branch. In teh
+First create a repository with a `master` and a `source` branch. In the
 `source` branch is where you will develop your pelican website. The `master`
 branch is used for publishing the site.
 
