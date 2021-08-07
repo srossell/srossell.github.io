@@ -24,31 +24,33 @@ STATIC_PATHS = ["images", "favicon.ico", "documents"]
 # content paths
 PATH = "content"
 PAGE_PATHS = ["pages"]
-ARTICLE_PATHS = ["blog"]
+ARTICLE_PATHS = ["blog/tech"]
 
 LOGO = "/images/logo.svg"
 "./content/images/blog/tech/210126_splines2piecewise/pw_spline.png"
 # special content
-HERO = [
-    {
-        "image": "/images/blog/tech/190414_bda_and_odes/scatter.png",
-        "title": "Bayesian Data Analysis and ODEs",
-        "text": "Combining two fundamental paradigms to learn more from biological experiments",
-        "links": [],
-    },
-    {
-        "image": "/images/blog/tech/210126_splines2piecewise/pw_spline.png",
-        "title": "Splines as piecewise functions",
-        "text": "",
-        "links": [],
-    },
-    #    {
-    #        "image": "/images/hero/three.png",
-    #        "title": "Third plot",
-    #        "text": "",
-    #        "links": [],
-    #    },
-]
+# NOTE. Interesting, but needs a good look into what images to show and maybe
+# editing the display style.
+# HERO = [
+#     {
+#         "image": "/images/blog/tech/190414_bda_and_odes/scatter.png",
+#         "title": "Bayesian Data Analysis and ODEs",
+#         "text": "Combining two fundamental paradigms to learn more from biological experiments",
+#         "links": [],
+#     },
+#     {
+#         "image": "/images/blog/tech/210126_splines2piecewise/pw_spline.png",
+#         "title": "Splines as piecewise functions",
+#         "text": "",
+#         "links": [],
+#     },
+#     #    {
+#     #        "image": "/images/hero/three.png",
+#     #        "title": "Third plot",
+#     #        "text": "",
+#     #        "links": [],
+#     #    },
+# ]
 
 # Social widget
 SOCIAL = (
