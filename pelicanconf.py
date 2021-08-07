@@ -27,28 +27,28 @@ PAGE_PATHS = ["pages"]
 ARTICLE_PATHS = ["blog"]
 
 LOGO = "/images/logo.svg"
-
+"./content/images/blog/tech/210126_splines2piecewise/pw_spline.png"
 # special content
-# HERO = [
-#     {
-#         "image": "/images/hero/one.png",
-#         "title": "Visualization",
-#         "text": "And some text",
-#         "links": [],
-#     },
-#     {
-#         "image": "/images/hero/two.png",
-#         "title": "Another plot",
-#         "text": "",
-#         "links": [],
-#     },
-#     {
-#         "image": "/images/hero/three.png",
-#         "title": "Third plot",
-#         "text": "",
-#         "links": [],
-#     },
-# ]
+HERO = [
+    {
+        "image": "/images/blog/tech/190414_bda_and_odes/scatter.png",
+        "title": "Bayesian Data Analysis and ODEs",
+        "text": "Combining two fundamental paradigms to learn more from biological experiments",
+        "links": [],
+    },
+    {
+        "image": "/images/blog/tech/210126_splines2piecewise/pw_spline.png",
+        "title": "Splines as piecewise functions",
+        "text": "",
+        "links": [],
+    },
+    #    {
+    #        "image": "/images/hero/three.png",
+    #        "title": "Third plot",
+    #        "text": "",
+    #        "links": [],
+    #    },
+]
 
 # Social widget
 SOCIAL = (
@@ -58,7 +58,7 @@ SOCIAL = (
 
 ABOUT = {
     "image": "/images/about/about.jpeg",
-    "mail": "sergio.rossell@gmail.com",
+    "mail": "sergio.rossell gmail com",
     # keep it a string if you dont need multiple languages
     "text": "drop me a line.",
 }
