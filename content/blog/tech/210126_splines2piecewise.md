@@ -20,8 +20,8 @@ As an example, I use the example shown in Scipy's UnivariateSpline, with a offse
 $$y(x) =
   \begin{cases}
      y_0\cdot (x-x_0) + b_0 \cdot (x-x_0) + c_0 \cdot (x-x_0)^2 + d_0\cdot (x-x_0)^3 & \in [x_0, x_1) \\
-     y_0\cdot (x-x_1) + b_1 \cdot (x-x_1) + c_1 \cdot (x-x_1)^2 + d_0\cdot (x-x_1)^3 & \in [x_1, x_2) \\
-     y_0\cdot (x-x_2) + b_2 \cdot (x-x_2) + c_0 \cdot (x-x_2)^2 + d_0\cdot (x-x_2)^3 & \in [x_2, x_3]
+     y_1\cdot (x-x_1) + b_1 \cdot (x-x_1) + c_1 \cdot (x-x_1)^2 + d_1\cdot (x-x_1)^3 & \in [x_1, x_2) \\
+     y_2\cdot (x-x_2) + b_2 \cdot (x-x_2) + c_2 \cdot (x-x_2)^2 + d_2\cdot (x-x_2)^3 & \in [x_2, x_3]
   \end{cases}$$
 
 How to get this representation from Scipy's UnivariateSpline:
@@ -55,7 +55,7 @@ p_c = p_spl.c[:, k:-k]
 
 #### A pretty table of the coefficients using pandas
 import pandas as pd
-pd.DataFrame(p_c, index=list("ybcd"), columns=[
+pd.DataFrame(p_c, index=list("ybcd"), columns=[f"segment_{i}" for i in range(p_c.shape[1])])
 ```
 
 | coeff      | segment_0   | segment_1    | segment_2   |
