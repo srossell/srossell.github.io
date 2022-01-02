@@ -24,7 +24,7 @@ STATIC_PATHS = ["images", "favicon.ico", "documents"]
 # content paths
 PATH = "content"
 PAGE_PATHS = ["pages"]
-ARTICLE_PATHS = ["blog/tech"]
+ARTICLE_PATHS = ["blog"]
 
 LOGO = "/images/logo.svg"
 "./content/images/blog/tech/210126_splines2piecewise/pw_spline.png"
