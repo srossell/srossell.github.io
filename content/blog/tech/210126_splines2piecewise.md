@@ -5,7 +5,7 @@ Image: /images/blog/tech/210126_splines2piecewise/pw_spline.png
 Tags: Stan, Bayes, ODEs
 Slug: splines2piecewise
 
-# Building piecewise functions from splines
+# Building piecewise functions from splines.
 
 In this notebook I show how to build piecewse functions from splines using Scipy. If you stay within Python there may be no need for building a piecewise function. My motivation raised from the desire to use splines fitted to data as inputs for modeling in [Stan](https://mc-stan.org/).
 
