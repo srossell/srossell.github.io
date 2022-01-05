@@ -116,7 +116,7 @@
             </div>
 
         <div class="animate-box" data-animate-effect="fadeInLeft">
-            <p class="animate-box" data-animate-effect="fadeInLeft"><h1>Building piecewise functions from splines</h1>
+            <p class="animate-box" data-animate-effect="fadeInLeft"><h1>Building piecewise functions from splines.</h1>
 <p>In this notebook I show how to build piecewse functions from splines using Scipy. If you stay within Python there may be no need for building a piecewise function. My motivation raised from the desire to use splines fitted to data as inputs for modeling in <a href="https://mc-stan.org/">Stan</a>.</p>
 <p>I took ideas from two stackoverflow posts. The <a href="https://stackoverflow.com/questions/43458414/python-scipy-how-to-get-cubic-spline-equations-from-cubicspline">first</a> shows how to build piecewise functions from Scipy's <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html">CubicSpline</a>. The <a href="https://stackoverflow.com/questions/22488637/getting-spline-equation-from-univariatespline-object">second</a> shows how to build piecewise functions from Scipy's <a href="hhttps://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html">UnivariateSpline</a>.</p>
 <p>As an example, I use the example shown in Scipy's UnivariateSpline, with a offset to avoid negative number. Then I show how to use build, from a UnivariateSpline instance, a piecewise function that works in Stan.</p>
@@ -124,8 +124,8 @@
 <div class="math">$$y(x) =
   \begin{cases}
      y_0\cdot (x-x_0) + b_0 \cdot (x-x_0) + c_0 \cdot (x-x_0)^2 + d_0\cdot (x-x_0)^3 &amp; \in [x_0, x_1) \\
-     y_0\cdot (x-x_1) + b_1 \cdot (x-x_1) + c_1 \cdot (x-x_1)^2 + d_0\cdot (x-x_1)^3 &amp; \in [x_1, x_2) \\
-     y_0\cdot (x-x_2) + b_2 \cdot (x-x_2) + c_0 \cdot (x-x_2)^2 + d_0\cdot (x-x_2)^3 &amp; \in [x_2, x_3]
+     y_1\cdot (x-x_1) + b_1 \cdot (x-x_1) + c_1 \cdot (x-x_1)^2 + d_1\cdot (x-x_1)^3 &amp; \in [x_1, x_2) \\
+     y_2\cdot (x-x_2) + b_2 \cdot (x-x_2) + c_2 \cdot (x-x_2)^2 + d_2\cdot (x-x_2)^3 &amp; \in [x_2, x_3]
   \end{cases}$$</div>
 <p>How to get this representation from Scipy's UnivariateSpline:</p>
 <p>Create data.</p>
@@ -155,7 +155,7 @@
 
 <span class="c1">#### A pretty table of the coefficients using pandas</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">p_c</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;ybcd&quot;</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">p_c</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;ybcd&quot;</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;segment_</span><span class="si">{i}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p_c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
 </pre></div>
 
 

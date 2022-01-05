@@ -51,7 +51,7 @@ githubpages.&lt;/p&gt;
 theme&lt;/a&gt;. The workflow is
 modified from a workflow by Joel Zeldes at
 &lt;a href="http://anotherdatum.com/pelican-and-github-pages-workflow.html"&gt;anotherdatum&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;First create a repository with a &lt;code&gt;master&lt;/code&gt; and a &lt;code&gt;source&lt;/code&gt; branch. In teh
+&lt;p&gt;First create a repository with a &lt;code&gt;master&lt;/code&gt; and a &lt;code&gt;source&lt;/code&gt; branch. In the
 &lt;code&gt;source&lt;/code&gt; branch is where you will develop your pelican website. The &lt;code&gt;master&lt;/code&gt;
 branch is used for publishing the site.&lt;/p&gt;
 &lt;p&gt;You'll need to create a folder in &lt;code&gt;.git/hooks/pre-push&lt;/code&gt; with the follwing
